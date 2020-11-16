@@ -1,6 +1,6 @@
 CXX      := -g++
 CXXFLAGS := -Wall -Wno-psabi -Werror -Wextra -Wno-implicit-fallthrough
-LDFLAGS  := -L/usr/lib -lbluetooth -L/usr/local/lib -lstdc++ -lm -lpaho-mqttpp3 -lpaho-mqtt3a
+LDFLAGS  := -L/usr/lib -lbluetooth -L/usr/local/lib -lstdc++ -lm
 BUILD    := ./build
 OBJ_DIR  := $(BUILD)
 APP_DIR  := $(BUILD)
@@ -8,6 +8,7 @@ RELEASE_DIR  := $(BUILD)/release
 TARGET   := govee-gateway
 ifeq ($(MQTT),1)
 CXXFLAGS += -DMQTT
+LDFLAGS  += -lpaho-mqttpp3 -lpaho-mqtt3a
 endif
 
 INCLUDE  := -I. -I./src -I/usr/local/include
@@ -36,6 +37,7 @@ $(RELEASE_DIR)/$(TARGET): $(OBJECTS)
 
 .PHONY: all build clean debug release doc info
 
+all: clean
 all: build $(APP_DIR)/$(TARGET)
 
 build:

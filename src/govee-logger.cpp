@@ -25,15 +25,15 @@ public:
 #endif
 
 //! Private methods
-bool Govee_logger::readConfigFile (const char* iniFileName)
+void Govee_logger::readConfigFile (const char* iniFileName)
 {
   INIReader reader(iniFileName);
 	if (reader.ParseError() < 0) {
-		std::cout << "Can't load 'goveeLogger.ini'\n";
-    return false;
+		std::cout << "Can't load configuration file " << iniFileName << "\n";
+    exit(EXIT_FAILURE);
 	} else {
     logInterval = reader.GetInteger("system", "logInterval", 30);
-    debugLevel = reader.GetInteger("system", "debugLevel", 0);
+    verbosity = reader.GetInteger("system", "verbosity", 0);
 		mqtt_host = reader.Get("mqtt", "host", "NONE");
 		mqtt_username = reader.Get("mqtt", "username", "");
 		mqtt_password = reader.Get("mqtt", "password", "");
@@ -62,7 +62,6 @@ bool Govee_logger::readConfigFile (const char* iniFileName)
       std::cout << "No AddressMap section found in config file." << std::endl;
     }
   }
-  return true;
 }
 
 void Govee_logger::initializeLogger(void)
@@ -95,7 +94,7 @@ void Govee_logger::initializeLogger(void)
 }
 
 
-int Govee_logger::sendData()
+void Govee_logger::sendData()
 {
 
 	// initialize mqtt
@@ -111,7 +110,6 @@ int Govee_logger::sendData()
   	}
   	catch (const mqtt::exception& exc) {
   		std::cerr << exc.what() << std::endl;
-  		return 1;
   	}
   }
   #endif
@@ -139,7 +137,7 @@ int Govee_logger::sendData()
 				ismapped = true;
 			}
 
-      if (debugLevel>0)
+      if (verbosity>0)
       {
         std::cout << "Storing data for " << (ismapped?ANSI_COLOR_GREEN:ANSI_COLOR_RED) << addr << ANSI_COLOR_RESET << " (" << sz << " elements): ";
       }
@@ -179,7 +177,7 @@ int Govee_logger::sendData()
 				mqtt::message_ptr pubmsg = mqtt::make_message(mqtt_topic_complete, mqtt_outStream.str().c_str());
 				pubmsg->set_qos(QOS);
 				client.publish(pubmsg)->wait_for(TIMEOUT);
-        if (debugLevel>0)
+        if (verbosity>0)
         {
           std::cout << ANSI_COLOR_GREEN << "MQTT ok..." << ANSI_COLOR_RESET;
         }
@@ -197,18 +195,18 @@ int Govee_logger::sendData()
 					.field("bat",tempData.battery)
           .field("rssi",tempData.rssi)
 					.post_http(si);
-        if (debugLevel>0)
+        if (verbosity>0)
         {
           std::cout << ANSI_COLOR_GREEN << "InfluxDB ok.." << ANSI_COLOR_RESET ;
         }
-			} else if (influx_active && debugLevel>0) {
+			} else if (influx_active && verbosity>0) {
 				std::cout << ANSI_COLOR_YELLOW << "skipping InfluxDB " ;
         if (!ismapped)
         {
           std::cout << ANSI_COLOR_MAGENTA << "(device not mapped, please check configuration).." << ANSI_COLOR_RESET;
         }
 			}
-      if (debugLevel>0)
+      if (verbosity>0)
       {
         std::cout << "." << std::endl;
       }
@@ -223,11 +221,8 @@ int Govee_logger::sendData()
 	}
 	catch (const mqtt::exception& exc) {
 		std::cerr << exc.what() << std::endl;
-		return 1;
 	}
   #endif
-
- 	return 0;
 }
 
 
@@ -257,7 +252,7 @@ void Govee_logger::logData(const BLEPacket *bp, const char* data)
       ret.first->second.push(gd);
 
       // print data
-      if (debugLevel>0)
+      if (verbosity>0)
       {
         std::cout << "Data logged. Queue#: " << std::setw(2) << ret.first->second.size() << ". ";
         std::cout.setf(std::ios::fixed);

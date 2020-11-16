@@ -41,9 +41,6 @@ class Govee_logger
   bool initialized=false;         //!< initialized flag
   time_t timeStart;               //!< time when interval counter starts
 
-  // logging parameters
-  int logInterval;                //!< log interval in seconds
-
   // mqtt parameters
   std::string mqtt_host;
   std::string mqtt_username;
@@ -62,25 +59,27 @@ class Govee_logger
 
   // async client handle
   #ifdef MQTT
-  mqtt::async_client *async_client;
+  //mqtt::async_client *async_client;
   mqtt::connect_options conopts;
   mqtt::token_ptr conntok;
   #endif
-  
+
   // dat maps
   std::map<std::string, std::string> adrMap;    //!< Address map from INI file
   std::map<bdaddr_t, std::queue<GoveeData>> govee_dataQueue; //!< data queue for govee data by address
 
   // private methods
-  bool readConfigFile(const char* iniFileName);
+  void readConfigFile(const char* iniFileName);
   void initializeLogger(void);
-  int sendData();
+  void sendData(void);
 
   public:
-    int debugLevel;
+    int verbosity=0;
+		int logInterval;                //!< log interval in seconds
+
 
     Govee_logger(const char* iniFileName);
     void logData(const BLEPacket* bp, const char* data);
 };
 
-#endif // __Govee_logger_H
+#endif // __Govee_lo

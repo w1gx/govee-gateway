@@ -17,6 +17,7 @@
 #include <sstream>
 #include <sys/types.h>
 #include <unistd.h>
+#include <getopt.h>
 
 #include "bleScan.h"
 #include "blePacket.h"
@@ -24,6 +25,27 @@
 
 //! Scanning flag
 volatile bool isScanning = true;
+
+//! command line options
+static const char short_options[] = "hl:c:i:v:x";
+static const struct option long_options[] = {
+		{ "help",   no_argument,       NULL, 'h' },
+		{ "config",required_argument, NULL, 'c' },
+		{ "interval",required_argument, NULL, 'i' },
+		{ "verbosity",required_argument, NULL, 'v' },
+		{ 0, 0, 0, 0 }
+};
+static void usage(int argc, char **argv)
+{
+	(void) argc;
+	std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
+	std::cout << "  Options:" << std::endl;
+	std::cout << "    -h | --help               print this message" << std::endl;
+	std::cout << "    -c | --config <file>      path to the config file" << std::endl;
+	std::cout << "    -i | --interval <seconds> reporting interval in seconds" << std::endl;
+	std::cout << "    -v | --verbosity <level>  verbosity level" << std::endl;
+	std::cout << std::endl;
+}
 
 //! Signal handler for SIGINT
 void SignalHandlerSIGINT(int signal)
@@ -42,7 +64,7 @@ void SignalHandlerSIGHUP(int signal)
 }
 
 //! Main
-int main(void)
+int main(int argc, char **argv)
 {
 
 	// signal handlers
@@ -50,15 +72,58 @@ int main(void)
 	SignalHandlerPointer previousHandlerSIGINT = signal(SIGINT, SignalHandlerSIGINT);
 	SignalHandlerPointer previousHandlerSIGHUP = signal(SIGHUP, SignalHandlerSIGHUP);
 
+	char* confFileName;
+	confFileName = strdup("/etc/govee-gateway.ini");
+
+	// handle command line parameters
+	int verbosity=-1;
+	int logInterval=-1;
+	for (;;)
+	{
+		int idx;
+		int c = getopt_long(argc, argv, short_options, long_options, &idx);
+		if (c == -1)
+			break;
+		switch (c)
+		{
+		case 0: /* getopt_long() flag */
+			break;
+		case 'h':
+			usage(argc, argv);
+			exit(EXIT_SUCCESS);
+		case 'c':
+			confFileName = strdup(optarg);
+			std::cout << "config is " << confFileName << std::endl;
+			break;
+		case 'i':
+			try { logInterval = std::stoi(optarg); }
+			catch (const std::invalid_argument& ia) { std::cerr << "Invalid argument: " << ia.what() << std::endl; exit(EXIT_FAILURE); }
+			catch (const std::out_of_range& oor) { std::cerr << "Out of Range error: " << oor.what() << std::endl; exit(EXIT_FAILURE); }
+			break;
+		case 'v':
+			try { verbosity = std::stoi(optarg); }
+			catch (const std::invalid_argument& ia) { std::cerr << "Invalid argument: " << ia.what() << std::endl; exit(EXIT_FAILURE); }
+			catch (const std::out_of_range& oor) { std::cerr << "Out of Range error: " << oor.what() << std::endl; exit(EXIT_FAILURE); }
+			break;
+		default:
+			usage(argc, argv);
+			exit(EXIT_FAILURE);
+		}
+	}
+
 	// Data
 	BLEScan gble;												//!< BLEScan object
 	std::map<bdaddr_t,int> goveeMap;		//!< Map for known Govee devices
 	isScanning = true;									//!< Scanning flag
 
-	std::cout << "------ STARTED ----- " << std::endl;
+	std::cout << "------ STARTED ----- "  << std::endl;
 
 	// initialize the logging module
-	Govee_logger gl("govee-gateway.ini");
+	Govee_logger gl(confFileName);
+	if (verbosity>-1) gl.verbosity=verbosity;			//!< override verbosity with command line arg
+	if (logInterval>-1) gl.logInterval=logInterval; //!< override loginterval with command line arg
+	if (gl.logInterval<2) gl.logInterval=2;					//!< minimum logInterval
+	gl.logInterval-=1;															//!< correct log interval by a second to accound for processing
 
 	// connect to BLE and start scanning
 	if (gble.connect())
@@ -71,7 +136,7 @@ int main(void)
 				// print packet info if it's in the list of Govee devices
 				if ((goveeMap.find(bp.bdaddr) != goveeMap.end()))
 				{
-					bp.printInfo(gl.debugLevel);
+					bp.printInfo(gl.verbosity);
 				}
 
 				// see if we have manufacturer data
@@ -84,7 +149,7 @@ int main(void)
 						// add to govee map if it doesn't exist yet;
 						if (goveeMap.find(bp.bdaddr) == goveeMap.end())
 						{
-							bp.printInfo(gl.debugLevel);
+							bp.printInfo(gl.verbosity);
 							goveeMap.insert(std::make_pair(bp.bdaddr,1));
 						}
 						// log data

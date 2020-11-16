@@ -84,7 +84,7 @@ void BLEPacket::printInfo(int debugLevel)
       co << "]"<< std::endl;
 
       co << "|  |  |  |  ^------------------------------> number of responses: " << std::setw(2) << std::setfill('0') << int(buf[4]) << std::endl;
-      co << "|  |  |  ^---------------------------------> Subevent: " << std::setw(2) << std::setfill('0') << int(buf[3]) << "[";
+      co << "|  |  |  ^---------------------------------> subevent: " << std::setw(2) << std::setfill('0') << int(buf[3]) << "[";
       switch (subevent) {
         case 0x01:
         co << "EVT_LE_CONNECTION COMPLETE";
@@ -100,9 +100,9 @@ void BLEPacket::printInfo(int debugLevel)
         break;
       }
       co << "]"<< std::endl;
-      co << "|  |  ^------------------------------------> Bytes following: " << std::setw(2) << std::setfill('0') << std::dec << int(buf[2]) << std::endl;
-      co << "|  ^---------------------------------------> Event Code: " << std::setw(2) << std::setfill('0') << int(buf[1]) << "[EVT_LE_META_EVENT]" << std::endl;
-      co << "^------------------------------------------> Packet indicator: " << std::setw(2) << std::setfill('0') << int(buf[0]) << "[HCI_EVENT_PKT]" << std::endl;
+      co << "|  |  ^------------------------------------> bytes following: " << std::setw(2) << std::setfill('0') << std::dec << int(buf[2]) << std::endl;
+      co << "|  ^---------------------------------------> event Code: " << std::setw(2) << std::setfill('0') << int(buf[1]) << "[EVT_LE_META_EVENT]" << std::endl;
+      co << "^------------------------------------------> packet indicator: " << std::setw(2) << std::setfill('0') << int(buf[0]) << "[HCI_EVENT_PKT]" << std::endl;
     }
 
     if (debugLevel > 1)
