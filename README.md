@@ -42,7 +42,7 @@ The system can be configured in a config file, which is located in the root of t
 	; Configuration file for govee-gateway
 
 	[system]
-	debugLevel = 1                  ;; 0=none, 1=show temp readings, 2=show BLE packets, 3=show BLE detail
+	verbosity = 1                   ;; 0=none, 1=show temp readings, 2=show BLE packets, 3=show BLE detail
 	logInterval = 30                ;; log interval in seconds (logging to MQTT/InfluxDB)
 
 	[mqtt]

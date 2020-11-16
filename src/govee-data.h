@@ -6,12 +6,15 @@
 
 class  GoveeData {
 public:
-	float temperatureC;
-	float temperatureF;
-	float humidity;
-	int battery;
-	signed char rssi;
+	float temperatureC;			//!< temperature in C
+	float temperatureF;			//!< temperature in F
+	float humidity;					//!< humidity in %
+	int battery;						//!< battery level in %
+	signed char rssi;				//!< rssi in dBm
+
+	// decode data from info packet
 	void decodeData(const char* const data);
+	// constructor
 	GoveeData() : temperatureC(0), temperatureF(0), humidity(0), battery(0) { };
 };
 
