@@ -2,3 +2,4 @@
 build/*
 doxygen/*
 #govee-gateway.ini
+*.ini
