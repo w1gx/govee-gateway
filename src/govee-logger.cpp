@@ -66,6 +66,7 @@ void Govee_logger::readConfigFile (const char* iniFileName)
 
 void Govee_logger::initializeLogger(void)
 {
+	std::cout << "Checking connections..." << std::endl;
   // initialize serialization
   #ifdef MQTT
 	if (mqtt_host != "NONE" && !mqtt_host.empty())
@@ -81,16 +82,50 @@ void Govee_logger::initializeLogger(void)
     mqtt::will_options will(willmsg);
     conopts.set_will(will);
 
-    mqtt_active = true;
-		std::cout << "MQTT host is " << mqtt_host << std::endl;
+		std::cout << "MQTT host is " << mqtt_host << "...";
 	}
+
+	// now try to connect
+	mqtt::async_client client(mqtt_host, "goveeLogger");
+	try {
+		conntok = client.connect(conopts);
+		conntok->wait();
+		std::cout << ANSI_COLOR_GREEN << "OK." << ANSI_COLOR_RESET << std::endl;
+		conntok = client.disconnect();
+		conntok->wait();
+		mqtt_active = true;
+	}
+	catch (const mqtt::exception& exc) {
+		std::cout << ANSI_COLOR_RED << "failed. " << ANSI_COLOR_MAGENTA << exc.what() << ANSI_COLOR_RESET << std::endl;
+	}
+
   #endif
 
 	if (influx_host != "NONE" && !influx_host.empty())
 	{
-    influx_active = true;
-		std::cout << "InfluxDB host is " << influx_host << std::endl;
+		std::cout << "InfluxDB host is " << influx_host << "... ";
+
+		// try to connect
+		std::string resp;
+		influxdb_cpp::server_info si(influx_host, influx_port, influx_database, influx_username, influx_password);
+		influxdb_cpp::query(resp, "show databases", si);
+		if (resp.length()>0)
+		{
+			influx_active = true;
+			std::cout << ANSI_COLOR_GREEN << " ok." ANSI_COLOR_RESET << std::endl;
+		} else {
+			std::cout <<ANSI_COLOR_RED << " failed." << ANSI_COLOR_RESET << std::endl;
+		}
 	}
+
+	if (!mqtt_active && !influx_active)
+	{
+		std::cout << ANSI_COLOR_RED << "No active connections available. Terminating..." << ANSI_COLOR_RESET << std::endl;
+		exit(EXIT_FAILURE);
+	}
+
+	std::cout << ANSI_COLOR_YELLOW << "running..." << ANSI_COLOR_RESET << std::endl;
+
 }
 
 
@@ -174,13 +209,19 @@ void Govee_logger::sendData()
 				std::string mqtt_topic_complete = mqtt_topic+"/"+addr+"/DTA";
 
 				// send message
-				mqtt::message_ptr pubmsg = mqtt::make_message(mqtt_topic_complete, mqtt_outStream.str().c_str());
-				pubmsg->set_qos(QOS);
-				client.publish(pubmsg)->wait_for(TIMEOUT);
-        if (verbosity>0)
-        {
-          std::cout << ANSI_COLOR_GREEN << "MQTT ok..." << ANSI_COLOR_RESET;
-        }
+				try {
+					mqtt::message_ptr pubmsg = mqtt::make_message(mqtt_topic_complete, mqtt_outStream.str().c_str());
+					pubmsg->set_qos(QOS);
+					client.publish(pubmsg)->wait_for(TIMEOUT);
+        	if (verbosity>0)
+        	{
+          	std::cout << ANSI_COLOR_GREEN << "MQTT ok. " << ANSI_COLOR_RESET;
+        	}
+				}
+				catch (const mqtt::exception& exc) {
+					std::cerr << "Error creating MQTT message. " << exc.what() << std::endl;
+				}
+
 			}
       #endif
 
@@ -197,13 +238,13 @@ void Govee_logger::sendData()
 					.post_http(si);
         if (verbosity>0)
         {
-          std::cout << ANSI_COLOR_GREEN << "InfluxDB ok.." << ANSI_COLOR_RESET ;
+          std::cout << ANSI_COLOR_GREEN << "InfluxDB ok." << ANSI_COLOR_RESET ;
         }
 			} else if (influx_active && verbosity>0) {
 				std::cout << ANSI_COLOR_YELLOW << "skipping InfluxDB " ;
         if (!ismapped)
         {
-          std::cout << ANSI_COLOR_MAGENTA << "(device not mapped, please check configuration).." << ANSI_COLOR_RESET;
+          std::cout << ANSI_COLOR_MAGENTA << "(device not mapped, please check configuration).. " << ANSI_COLOR_RESET;
         }
 			}
       if (verbosity>0)
@@ -215,12 +256,15 @@ void Govee_logger::sendData()
 
 	// disconnect from MQTT
   #ifdef MQTT
-  try {
-		conntok = client.disconnect();
-		conntok->wait();
-	}
-	catch (const mqtt::exception& exc) {
-		std::cerr << exc.what() << std::endl;
+	if (mqtt_active)
+	{
+		try {
+			conntok = client.disconnect();
+			conntok->wait();
+		}
+		catch (const mqtt::exception& exc) {
+			std::cerr << exc.what() << std::endl;
+		}
 	}
   #endif
 }
