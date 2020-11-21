@@ -4,7 +4,7 @@ LDFLAGS  := -L/usr/lib -lbluetooth -L/usr/local/lib -lstdc++ -lm
 BUILD    := ./build
 OBJ_DIR  := $(BUILD)
 APP_DIR  := $(BUILD)
-RELEASE_DIR  := $(BUILD)/release
+RELEASE_DIR  := deb/govee-gateway/usr/local/bin
 TARGET   := govee-gateway
 ifeq ($(MQTT),1)
 CXXFLAGS += -DMQTT
@@ -51,13 +51,13 @@ debug: all
 
 release:
 	@echo "Release version in ${RELEASE_DIR}"
-release: clean
 release: CXXFLAGS += -O3 -Wno-array-bounds -Wno-stringop-truncation
 release: build $(RELEASE_DIR)/$(TARGET)
 
 clean:
 	-@rm -rvf $(OBJ_DIR)/*
 	-@rm -rvf $(APP_DIR)/*
+	-@rm -rvf $(RELEASE_DIR)/$(TARGET)
 	-@rm -rvf doc/*
 
 doc:
@@ -70,3 +70,9 @@ info:
 	@echo "[*] Sources:         ${SRC}         "
 	@echo "[*] Objects:         ${OBJECTS}     "
 	@echo "[*] Dependencies:    ${DEPENDENCIES}"
+
+deb: release
+deb: $(RELEASE_DIR)/$(TARGET) deb/govee-gateway/DEBIAN/control deb/govee-gateway/usr/local/lib/systemd/system/govee-gateway.service
+	chmod a+x deb/govee-gateway/DEBIAN/control deb/govee-gateway/DEBIAN/postinst deb/govee-gateway/DEBIAN/postrm deb/govee-gateway/DEBIAN/prerm
+	dpkg-deb --build deb/govee-gateway
+	@echo "Debian package created"

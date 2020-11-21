@@ -1,5 +1,6 @@
 .DS_Store
 build/*
 doxygen/*
-#govee-gateway.ini
+**/usr/local/bin/
 *.ini
+*.deb

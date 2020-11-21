@@ -35,6 +35,21 @@ The application can be built with or without mqtt support.
 	sudo apt-get install doxygen graphviz
 	make doc
 
+#### making the deb package
+
+After making the release file, run the following
+
+	make deb
+
+The deb file is in **./deb/govee-gateway.deb**. To install it, run
+
+	sudo apt-get install ./deb/govee-gateway.deb
+
+The status can then be checked within
+
+	sudo service govee-gateway status
+
+
 ### Configuration
 
 The system can be configured in a config file, which is located in the root of the project folder. The config file can be passed on via command line parameters (see below). It contains the MQTT and InfluxDB configuration. If a host field is left empty, logging will be disabled for the section.

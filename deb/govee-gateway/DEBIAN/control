@@ -1,0 +1,10 @@
+Package: govee-gateway
+Version: 1.0
+Section: custom
+Priority: optional
+Architecture: armhf
+Essential: no
+Installed-Size: 35
+Maintainer: martin@w1gx.us
+Description: trasmit Govee Thermometer BLE advertisements to MQTT broker and InfluxDB
+Depends: libbluetooth3
