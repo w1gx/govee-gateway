@@ -1,0 +1,18 @@
+#!/bin/sh
+# POSTINST script for govee-gateway
+echo "\033[36m govee-gateway installed.\033[39m"
+# Make logging directory
+mkdir --parents /var/log/govee-gateway/
+# provide initial conf file
+FILE="/etc/govee-gateway.conf"
+if [ -f $FILE ];then
+    echo "$FILE already exists"
+else
+    mv $FILE.def $FILE
+    echo "$FILE created"
+fi
+# reload daemon and start service
+systemctl daemon-reload
+systemctl enable govee-gateway.service
+systemctl start govee-gateway.service
+exit 0

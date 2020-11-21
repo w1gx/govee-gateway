@@ -35,6 +35,21 @@ The application can be built with or without mqtt support.
 	sudo apt-get install doxygen graphviz
 	make doc
 
+#### making the deb package
+
+After making the release file, run the following
+
+	make deb
+
+The deb file is in **./deb/govee-gateway.deb**. To install it, run
+
+	sudo apt-get install ./deb/govee-gateway.deb
+
+The status can then be checked within
+
+	sudo service govee-gateway status
+
+
 ### Configuration
 
 The system can be configured in a config file, which is located in the root of the project folder. The config file can be passed on via command line parameters (see below). It contains the MQTT and InfluxDB configuration. If a host field is left empty, logging will be disabled for the section.
@@ -66,7 +81,11 @@ The system can be configured in a config file, which is located in the root of t
 The InfluxDB database must already exists, the Govee Gateway does not create databases. Also, all data is logged to mqtt (if enabled), but only data from devices that are mapped in the "AddressMap" section are logged to InfluxDB.
 
 ## Running the application
-sudo ./build/release/goveeBLE
+
+
+### from the command line
+
+sudo ./deb/govee-gateway/usr/local/bin/govee-gateway
 
 	Usage: ./build/release/govee-gateway [options]
   	Options:
@@ -76,6 +95,17 @@ sudo ./build/release/goveeBLE
     	-v | --verbosity <level>  debug level
 
 The command line options override the parameters in the config file.
+
+### as a service
+
+If the gateway has been installed as a service (see above), the system starts it automatically.
+
+Starting the service:
+    sudo service govee-gateway start
+
+Stopping the service
+    sudo service govee-gateway stop
+
 
 ## Console Output
 

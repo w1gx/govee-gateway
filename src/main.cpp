@@ -52,7 +52,7 @@ void SignalHandlerSIGINT(int signal)
 {
 	(void) signal;
 	isScanning = false;
-	std::cerr << "SIGINT caught." << std::endl;
+	std::cout << "SIGINT caught. Exiting." << std::endl;
 }
 
 //! Signal handler for SIGHUP
@@ -60,7 +60,7 @@ void SignalHandlerSIGHUP(int signal)
 {
 	(void) signal;
 	isScanning = false;
-	std::cerr << "SIGHUP caught." << std::endl;
+	std::cerr << "SIGHUP caught. Exiting." << std::endl;
 }
 
 //! Main
@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 	SignalHandlerPointer previousHandlerSIGHUP = signal(SIGHUP, SignalHandlerSIGHUP);
 
 	char* confFileName;
-	confFileName = strdup("/etc/govee-gateway.ini");
+	confFileName = strdup("/etc/govee-gateway.conf");
 
 	// handle command line parameters
 	int verbosity=-1;

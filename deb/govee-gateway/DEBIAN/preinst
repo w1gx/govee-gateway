@@ -1,0 +1,9 @@
+#!/bin/sh
+# PREINST script for govee-gateway
+FILE="/etc/govee-gateway.conf"
+if [ -f $FILE ];then
+    echo "$FILE exists"
+else
+    echo "$FILE doesn't exist"
+fi
+exit 0

@@ -1,0 +1,6 @@
+#!/bin/sh
+# POSTRM script for govee-gateway
+
+echo "\033[36m govee-gateway removed.\033[39m"
+systemctl daemon-reload
+exit 0
