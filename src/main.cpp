@@ -116,8 +116,6 @@ int main(int argc, char **argv)
 	std::map<bdaddr_t,int> goveeMap;		//!< Map for known Govee devices
 	isScanning = true;									//!< Scanning flag
 
-	std::cout << "------ STARTED ----- "  << std::endl;
-
 	// initialize the logging module
 	Govee_logger gl(confFileName);
 	if (verbosity>-1) gl.verbosity=verbosity;			//!< override verbosity with command line arg
