@@ -22,7 +22,7 @@ public:
 			<< (tok ? tok->get_message_id() : -1) << std::endl;
 	}
 };
-#endif
+#endif //MQTT
 
 //! Private methods
 void Govee_logger::readConfigFile (const char* iniFileName)
@@ -82,23 +82,22 @@ void Govee_logger::initializeLogger(void)
     mqtt::will_options will(willmsg);
     conopts.set_will(will);
 
-		std::cout << "MQTT host is " << mqtt_host << "...";
-	}
+		std::cout << "MQTT host is '" << mqtt_host << "'...";
 
-	// now try to connect
-	mqtt::async_client client(mqtt_host, "goveeLogger");
-	try {
-		conntok = client.connect(conopts);
-		conntok->wait();
-		std::cout << ANSI_COLOR_GREEN << "OK." << ANSI_COLOR_RESET << std::endl;
-		conntok = client.disconnect();
-		conntok->wait();
-		mqtt_active = true;
+		// now try to connect
+		mqtt::async_client client(mqtt_host, "goveeGateway");
+		try {
+			conntok = client.connect(conopts);
+			conntok->wait();
+			std::cout << ANSI_COLOR_GREEN << "ok." << ANSI_COLOR_RESET << std::endl;
+			conntok = client.disconnect();
+			conntok->wait();
+			mqtt_active = true;
+		}
+		catch (const mqtt::exception& exc) {
+			std::cout << ANSI_COLOR_RED << "failed. " << ANSI_COLOR_MAGENTA << exc.what() << ANSI_COLOR_RESET << std::endl;
+		}
 	}
-	catch (const mqtt::exception& exc) {
-		std::cout << ANSI_COLOR_RED << "failed. " << ANSI_COLOR_MAGENTA << exc.what() << ANSI_COLOR_RESET << std::endl;
-	}
-
   #endif
 
 	if (influx_host != "NONE" && !influx_host.empty())
