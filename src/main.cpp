@@ -155,7 +155,7 @@ int main(int argc, char **argv)
 					} // 088EC
 				} // manufacturer info
 
-				usleep(100);
+				usleep(10000);		// 10000 us = 10ms = 0.01s
 			} // scan
 		} // while
 		gble.disconnect();

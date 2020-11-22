@@ -176,7 +176,7 @@ void Govee_logger::sendData()
         std::cout << "Storing data for " << (ismapped?ANSI_COLOR_GREEN:ANSI_COLOR_RED) << addr << ANSI_COLOR_RESET << " (" << sz << " elements): ";
       }
 			GoveeData tempData;             //!< temporary data for average calculations
-      signed int rssi=0;             //!< separate rssi variable to calculate rssi average
+      signed int rssi=0;             	//!< separate rssi variable to calculate rssi average
 
 			// read all values in queue and calculate averages
 			while (!it->second.empty())
@@ -185,12 +185,14 @@ void Govee_logger::sendData()
 				tempData.humidity += it->second.front().humidity;
 				tempData.battery += it->second.front().battery;
         rssi += (it->second.front().rssi);
+				tempData.ma += (it->second.front().ma);
 				it->second.pop();
 			}
 			tempData.temperatureF = tempData.temperatureF / sz;
 			tempData.humidity = tempData.humidity / sz;
 			tempData.battery = tempData.battery / sz;
       rssi = int(rssi / sz);
+			tempData.ma = tempData.ma /sz ;
       tempData.rssi = static_cast<signed char>(rssi);
 
 			// send MQTT
@@ -203,6 +205,7 @@ void Govee_logger::sendData()
 				mqtt_outStream << "\"temp\":"  << std::dec << tempData.temperatureF << ",";
 				mqtt_outStream << "\"hum\":" <<  tempData.humidity << ",";
 				mqtt_outStream << "\"bat\":" << tempData.battery << ",";
+				mqtt_outStream << "\"ma\":" << int(tempData.ma) << ",";
         mqtt_outStream << "\"rssi\":" << int(tempData.rssi) << "}";
 
 				std::string mqtt_topic_complete = mqtt_topic+"/"+addr+"/DTA";
@@ -234,6 +237,7 @@ void Govee_logger::sendData()
 					.field("hum",tempData.humidity)
 					.field("bat",tempData.battery)
           .field("rssi",tempData.rssi)
+					.field("ma",tempData.ma)
 					.post_http(si);
         if (verbosity>0)
         {
@@ -302,7 +306,7 @@ void Govee_logger::logData(const BLEPacket *bp, const char* data)
         std::cout << std::setprecision(2);
         std::cout << ANSI_BOLD << ANSI_COLOR_BLUE << "GOVEE " << ANSI_COLOR_RED << bp->addr << ANSI_COLOR_RESET;
         std::cout << " - Temp=" << gd.temperatureC << "C (" << gd.temperatureF <<"F), Hum="<< gd.humidity;
-        std::cout << "%, Bat=" << gd.battery << "%, RSSI= "<< int(gd.rssi) << "dBm" << std::endl;
+        std::cout << "%, Bat=" << gd.battery << "%, RSSI= "<< int(gd.rssi) << "dBm, MA=" << int(gd.ma) << std::endl;
       }
 
       // check interval and send data
