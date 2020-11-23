@@ -116,21 +116,16 @@ void Govee_logger::initializeLogger(void)
 			std::cout <<ANSI_COLOR_RED << " failed." << ANSI_COLOR_RESET << std::endl;
 		}
 	}
-
 	if (!mqtt_active && !influx_active)
 	{
 		std::cout << ANSI_COLOR_RED << "No active connections available. Terminating..." << ANSI_COLOR_RESET << std::endl;
 		exit(EXIT_FAILURE);
 	}
-
 	std::cout << ANSI_COLOR_YELLOW << "running..." << ANSI_COLOR_RESET << std::endl;
-
 }
-
 
 void Govee_logger::sendData()
 {
-
 	// initialize mqtt
   #ifdef MQTT
   const auto TIMEOUT = std::chrono::seconds(10);
@@ -253,7 +248,6 @@ void Govee_logger::sendData()
 	}
   #endif
 }
-
 
 //! Constructor
 Govee_logger::Govee_logger(const char* iniFileName)
