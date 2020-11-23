@@ -42,5 +42,4 @@ public:
 
   void printInfo(int debugLevel);  //!< return packet info with debug level of 0-3
 };
-
 #endif //__BLE_PACKET_H
