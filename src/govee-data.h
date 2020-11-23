@@ -11,11 +11,12 @@ public:
 	float humidity;					//!< humidity in %
 	int battery;						//!< battery level in %
 	signed char rssi;				//!< rssi in dBm
+	signed char ma;					//!< mysterious attribute
 
-	// decode data from info packet
-	void decodeData(const char* const data);
+	void decodeData(const char* const data);						//!< decode data from info packet
+	void calcAverage(std::queue<GoveeData>* it);													//!< calculate average from iterator
 	// constructor
-	GoveeData() : temperatureC(0), temperatureF(0), humidity(0), battery(0) { };
+	GoveeData() : temperatureC(0), temperatureF(0), humidity(0), battery(0), rssi(0), ma(0){ };
 };
 
 #endif //__GoveeData_H

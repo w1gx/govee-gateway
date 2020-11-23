@@ -63,10 +63,56 @@ void SignalHandlerSIGHUP(int signal)
 	std::cerr << "SIGHUP caught. Exiting." << std::endl;
 }
 
+void scan(Govee_logger* gl)
+{
+	// Data
+	std::map<bdaddr_t,int> goveeMap;		//!< Map for known Govee devices
+	isScanning = true;									//!< Scanning flag
+	BLEScan gble;	//!< BLEScan object
+
+	// connect to BLE and start scanning
+	if (gble.connect())
+	{
+		while (isScanning)
+		{
+			BLEPacket bp;
+			if (gble.scan(&bp))
+			{
+				// print packet info if it's in the list of Govee devices
+				if ((goveeMap.find(bp.bdaddr) != goveeMap.end()))
+				{
+					bp.printInfo(gl->verbosity);
+				}
+
+				// see if we have manufacturer data
+				std::map<int,BLEPacket::t_adStructure>::iterator it = bp.adStructures.find(0xff);
+				if (it!=bp.adStructures.end())
+				{
+					// do we have a packet starting with 0x88EC? If so, we likely have a Govee sensor
+					if (it->second.data[0]==0x88 && it->second.data[1]==0xEC)
+					{
+						// add to govee map if it doesn't exist yet;
+						if (goveeMap.find(bp.bdaddr) == goveeMap.end())
+						{
+							bp.printInfo(gl->verbosity);
+							goveeMap.insert(std::make_pair(bp.bdaddr,1));
+						}
+						// log data
+						gl->logData(&bp,it->second.data);
+					} // 088EC
+				} // manufacturer info
+				usleep(10000);		// 10000 us = 10ms = 0.01s
+			} // scan
+		} // while
+		gble.disconnect();
+	} else {
+		std::cerr << "Could not connect to BLE device." << std::endl;
+	}
+}
+
 //! Main
 int main(int argc, char **argv)
 {
-
 	// signal handlers
 	typedef void(*SignalHandlerPointer)(int);
 	SignalHandlerPointer previousHandlerSIGINT = signal(SIGINT, SignalHandlerSIGINT);
@@ -111,11 +157,6 @@ int main(int argc, char **argv)
 		}
 	}
 
-	// Data
-	BLEScan gble;												//!< BLEScan object
-	std::map<bdaddr_t,int> goveeMap;		//!< Map for known Govee devices
-	isScanning = true;									//!< Scanning flag
-
 	// initialize the logging module
 	Govee_logger gl(confFileName);
 	if (verbosity>-1) gl.verbosity=verbosity;			//!< override verbosity with command line arg
@@ -123,47 +164,9 @@ int main(int argc, char **argv)
 	if (gl.logInterval<2) gl.logInterval=2;					//!< minimum logInterval
 	gl.logInterval-=1;															//!< correct log interval by a second to accound for processing
 
-	// connect to BLE and start scanning
-	if (gble.connect())
-	{
-		while (isScanning)
-		{
-			BLEPacket bp;
-			if (gble.scan(&bp))
-			{
-				// print packet info if it's in the list of Govee devices
-				if ((goveeMap.find(bp.bdaddr) != goveeMap.end()))
-				{
-					bp.printInfo(gl.verbosity);
-				}
-
-				// see if we have manufacturer data
-				std::map<int,BLEPacket::t_adStructure>::iterator it = bp.adStructures.find(0xff);
-				if (it!=bp.adStructures.end())
-				{
-					// do we have a packet starting with 0x88EC? If so, we likely have a Govee sensor
-					if (it->second.data[0]==0x88 && it->second.data[1]==0xEC)
-					{
-						// add to govee map if it doesn't exist yet;
-						if (goveeMap.find(bp.bdaddr) == goveeMap.end())
-						{
-							bp.printInfo(gl.verbosity);
-							goveeMap.insert(std::make_pair(bp.bdaddr,1));
-						}
-						// log data
-						gl.logData(&bp,it->second.data);
-					} // 088EC
-				} // manufacturer info
-
-				usleep(100);
-			} // scan
-		} // while
-		gble.disconnect();
-	} else {
-		std::cerr << "Could not connect to BLE device." << std::endl;
-	}
-
+	//start Scanning
+	scan(&gl);
+	std::cout<<"govee-gateway terminated."<<std::endl;
 	signal(SIGHUP, previousHandlerSIGHUP);
 	signal(SIGINT, previousHandlerSIGINT);
-
 }

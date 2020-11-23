@@ -149,10 +149,6 @@ bool BLEScan::scan(BLEPacket *packet)
       packet->rssi = char(info->data[current_offset]);
       return true;
     }
-
-  } else if (errno == EAGAIN)
-  {
-    usleep(100);
   }
   else if (errno == EINTR)
   {
