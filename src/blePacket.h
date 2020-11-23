@@ -19,7 +19,6 @@
 Stores all packet data and contains functionality to output packet information
 */
 class BLEPacket {
-
 public:
   //! info packet structure
   typedef struct {
@@ -41,8 +40,7 @@ public:
   t_adStructure adStructure_data;             //!< AD structure packet
   std::map<int,t_adStructure> adStructures;   //!< map for all AD structures of packet
 
-  void printInfo(int debugLevel);  //!< return packet info with debug level of 0-3 
-
+  void printInfo(int debugLevel);  //!< return packet info with debug level of 0-3
 };
 
 #endif //__BLE_PACKET_H

@@ -175,25 +175,8 @@ void Govee_logger::sendData()
       {
         std::cout << "Storing data for " << (ismapped?ANSI_COLOR_GREEN:ANSI_COLOR_RED) << addr << ANSI_COLOR_RESET << " (" << sz << " elements): ";
       }
-			GoveeData tempData;             //!< temporary data for average calculations
-      signed int rssi=0;             	//!< separate rssi variable to calculate rssi average
-
-			// read all values in queue and calculate averages
-			while (!it->second.empty())
-			{
-				tempData.temperatureF += it->second.front().temperatureF;
-				tempData.humidity += it->second.front().humidity;
-				tempData.battery += it->second.front().battery;
-        rssi += (it->second.front().rssi);
-				tempData.ma += (it->second.front().ma);
-				it->second.pop();
-			}
-			tempData.temperatureF = tempData.temperatureF / sz;
-			tempData.humidity = tempData.humidity / sz;
-			tempData.battery = tempData.battery / sz;
-      rssi = int(rssi / sz);
-			tempData.ma = tempData.ma /sz ;
-      tempData.rssi = static_cast<signed char>(rssi);
+			GoveeData tempData;             		//!< temporary data for average calculations
+			tempData.calcAverage(&it->second);	//!< calculate average for entire queue
 
 			// send MQTT
       #ifdef MQTT
@@ -223,7 +206,6 @@ void Govee_logger::sendData()
 				catch (const mqtt::exception& exc) {
 					std::cerr << "Error creating MQTT message. " << exc.what() << std::endl;
 				}
-
 			}
       #endif
 

@@ -11,7 +11,6 @@
 #ifdef MQTT
 #include "mqtt/async_client.h"
 #endif
-
 #include "blePacket.h"
 #include "govee-data.h"
 
@@ -70,7 +69,7 @@ class Govee_logger
   // private methods
   void readConfigFile(const char* iniFileName);
   void initializeLogger(void);
-  void sendData(void);
+	void sendData(void);
 
   public:
     int verbosity=0;
