@@ -1,5 +1,5 @@
 # govee-gateway
-![GitHub last commit](https://img.shields.io/github/last-commit/w1gx/govee-gateway?style=for-the-badge) ![Top language](https://img.shields.io/github/languages/top/w1gx/govee-gateway?style=for-the-badge) ![Language count](https://img.shields.io/github/languages/count/w1gx/govee-gateway?style=for-the-badge) ![Issues](https://img.shields.io/github/issues/w1gx/govee-gateway?style=for-the-badge) ![GitHub release](https://img.shields.io/github/v/release/w1gx/govee-gateway?style=for-the-badge)
+![GitHub last commit](https://img.shields.io/github/last-commit/w1gx/govee-gateway?style=for-the-badge) ![Top language](https://img.shields.io/github/languages/top/w1gx/govee-gateway?style=for-the-badge) ![Language count](https://img.shields.io/github/languages/count/w1gx/govee-gateway?style=for-the-badge) ![Issues](https://img.shields.io/github/issues/w1gx/govee-gateway?style=for-the-badge) ![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/w1gx/govee-gateway?style=for-the-badge) ![GitHub release](https://img.shields.io/github/v/release/w1gx/govee-gateway?style=for-the-badge) 
 >A BLE Gateway to MQTT/InfluxDB for Govee H5074 temperature sensors.
 
 ![title](./img/title.png)
@@ -125,4 +125,3 @@ The console output depends on the verbosity level selected (see above). A higher
 
 ## Status
 At this point the system does what I need, although I am not hundred percent confident that the battery status field is really correct. Since there is no official documentation, all I can do is monitor it, and potentially come back and correct it.
-Small improvements (such as the installation as a service) will come shortly.
