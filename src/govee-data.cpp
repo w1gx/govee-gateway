@@ -18,7 +18,7 @@ void GoveeData::decodeData(const char* const data)
 
 void GoveeData::calcAverage(std::queue<GoveeData>* it)
 {
-	signed int rssi=0;             	//!< separate rssi variable to calculate rssi average
+	signed int rssi_temp=0;             	//!< separate rssi variable to calculate rssi average
 	int sz =it->size();							//!< size of iterator
 	// read all values in queue and calculate averages
 	while (!it->empty())
@@ -27,7 +27,7 @@ void GoveeData::calcAverage(std::queue<GoveeData>* it)
 		temperatureC += it->front().temperatureC;
 		humidity += it->front().humidity;
 		battery += it->front().battery;
-		rssi += (it->front().rssi);
+		rssi_temp += (it->front().rssi);
 		ma += (it->front().ma);
 		it->pop();
 	}
@@ -35,7 +35,7 @@ void GoveeData::calcAverage(std::queue<GoveeData>* it)
 	temperatureC = temperatureC / sz;
 	humidity = humidity / sz;
 	battery = battery / sz;
-	rssi = int(rssi / sz);
+	rssi_temp = int(rssi_temp / sz);
 	ma = ma /sz ;
-	rssi = static_cast<signed char>(rssi);
+	rssi = static_cast<signed char>(rssi_temp);
 }
