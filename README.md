@@ -105,6 +105,8 @@ Starting the service:
 
 Stopping the service
     sudo service govee-gateway stop
+    
+Note that when you run the application as a service, the configuration file in /etc (/etc/govee-gateway.conf) will be used.
 
 
 ## Console Output
